@@ -1,25 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import UserList from './components/UserList';
+import UserForm from './components/UserForm';
+import axios from 'axios';
 
-function App() {
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [editingUser, setEditingUser] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    axios
+      .get('https://jsonplaceholder.typicode.com/users')
+      .then((response) => setUsers(response.data))
+      .catch(() => alert('Failed to fetch users'));
+  }, []);
+
+  const handleAdd = () => {
+    setEditingUser(null);
+    setShowForm(true);
+  };
+
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setShowForm(true);
+  };
+
+  const handleSave = () => {
+    setShowForm(false);
+  };
+
+  const addUserToState = (newUser) => {
+    setUsers((prevUsers) => [...prevUsers, newUser]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {showForm ? (
+        <UserForm
+          initialData={editingUser}
+          onSave={handleSave}
+          addUserToState={addUserToState}
+        />
+      ) : (
+        <UserList
+          users={users}
+          onEdit={handleEdit}
+          onAdd={handleAdd}
+          setUsers={setUsers}
+        />
+      )}
     </div>
   );
-}
+};
 
 export default App;
